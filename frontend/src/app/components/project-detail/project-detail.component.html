@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="loading" *ngIf="loading">Loading project...</div>
+
+  <div *ngIf="!loading && project">
+    <header>
+      <button class="btn-back" (click)="goBack()">← Back to Projects</button>
+      <h1>{{ project.name }}</h1>
+    </header>
+
+    <div class="project-info">
+      <div class="info-item">
+        <label>Owner:</label>
+        <span>{{ project.ownerName || 'Unknown' }}</span>
+      </div>
+      <div class="info-item">
+        <label>Created:</label>
+        <span>{{ project.createdAt | date:'medium' }}</span>
+      </div>
+      <div class="info-item">
+        <label>Last Updated:</label>
+        <span>{{ project.updatedAt | date:'medium' }}</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="viewIssues()">View Issues</button>
+    </div>
+  </div>
+</div>

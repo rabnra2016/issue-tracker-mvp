@@ -1,0 +1,104 @@
+<div class="container">
+  <header>
+    <button class="btn-back" (click)="goBack()">← Back to Project</button>
+    <h1>Issues</h1>
+    <button class="btn-primary" (click)="showCreateForm = true">+ New Issue</button>
+  </header>
+
+  <div class="create-form" *ngIf="showCreateForm">
+    <h3>Create New Issue</h3>
+    <input 
+      type="text" 
+      [(ngModel)]="newIssue.title" 
+      placeholder="Issue title"
+      class="form-input">
+    <textarea 
+      [(ngModel)]="newIssue.description" 
+      placeholder="Description"
+      rows="4"
+      class="form-input"></textarea>
+    <select [(ngModel)]="newIssue.priority" class="form-input">
+      <option value="LOW">Low</option>
+      <option value="MEDIUM">Medium</option>
+      <option value="HIGH">High</option>
+      <option value="CRITICAL">Critical</option>
+    </select>
+    <div class="form-actions">
+      <button class="btn-primary" (click)="createIssue()">Create</button>
+      <button class="btn-secondary" (click)="showCreateForm = false">Cancel</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input 
+      type="text" 
+      [(ngModel)]="searchText" 
+      placeholder="Search issues..."
+      (keyup.enter)="applyFilters()"
+      class="search-input">
+    
+    <select [(ngModel)]="statusFilter" (change)="applyFilters()" class="filter-select">
+      <option value="">All Status</option>
+      <option value="OPEN">Open</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="CLOSED">Closed</option>
+    </select>
+
+    <select [(ngModel)]="priorityFilter" (change)="applyFilters()" class="filter-select">
+      <option value="">All Priority</option>
+      <option value="LOW">Low</option>
+      <option value="MEDIUM">Medium</option>
+      <option value="HIGH">High</option>
+      <option value="CRITICAL">Critical</option>
+    </select>
+
+    <select [(ngModel)]="sortBy" (change)="applyFilters()" class="filter-select">
+      <option value="createdAt">Created Date</option>
+      <option value="updatedAt">Updated Date</option>
+      <option value="priority">Priority</option>
+      <option value="status">Status</option>
+    </select>
+
+    <select [(ngModel)]="sortOrder" (change)="applyFilters()" class="filter-select">
+      <option value="desc">Descending</option>
+      <option value="asc">Ascending</option>
+    </select>
+
+    <button class="btn-secondary" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading issues...</div>
+
+  <div class="issues-list" *ngIf="!loading">
+    <div class="issue-card" *ngFor="let issue of issues" (click)="viewIssue(issue.id)">
+      <div class="issue-header">
+        <h3>{{ issue.title }}</h3>
+        <div class="issue-badges">
+          <span class="badge" [ngClass]="getStatusClass(issue.status)">{{ issue.status }}</span>
+          <span class="badge" [ngClass]="getPriorityClass(issue.priority)">{{ issue.priority }}</span>
+        </div>
+      </div>
+      <p class="issue-description">{{ issue.description }}</p>
+      <div class="issue-meta">
+        <span>Created: {{ issue.createdAt | date:'short' }}</span>
+        <span *ngIf="issue.assigneeName">Assigned to: {{ issue.assigneeName }}</span>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="issues.length === 0">
+      <p>No issues found. Create your first issue!</p>
+    </div>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      [disabled]="currentPage === 0" 
+      (click)="changePage(currentPage - 1)"
+      class="btn-secondary">Previous</button>
+    <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+    <button 
+      [disabled]="currentPage >= totalPages - 1" 
+      (click)="changePage(currentPage + 1)"
+      class="btn-secondary">Next</button>
+  </div>
+</div>

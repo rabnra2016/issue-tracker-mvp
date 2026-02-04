@@ -1,0 +1,107 @@
+<div class="container">
+  <div class="loading" *ngIf="loading">Loading issue...</div>
+
+  <div *ngIf="!loading && issue">
+    <header>
+      <button class="btn-back" (click)="goBack()">← Back to Issues</button>
+      <div class="header-actions" *ngIf="!editing">
+        <button class="btn-primary" (click)="startEdit()">Edit</button>
+        <button class="btn-danger" (click)="deleteIssue()">Delete</button>
+      </div>
+    </header>
+
+    <div class="issue-content" *ngIf="!editing">
+      <div class="issue-header">
+        <h1>{{ issue.title }}</h1>
+        <div class="badges">
+          <span class="badge" [ngClass]="getStatusClass(issue.status)">{{ issue.status }}</span>
+          <span class="badge" [ngClass]="getPriorityClass(issue.priority)">{{ issue.priority }}</span>
+        </div>
+      </div>
+
+      <div class="issue-body">
+        <h3>Description</h3>
+        <p class="description">{{ issue.description }}</p>
+      </div>
+
+      <div class="issue-meta">
+        <div class="meta-item">
+          <label>Reporter:</label>
+          <span>{{ issue.reporterName || 'Unknown' }}</span>
+        </div>
+        <div class="meta-item" *ngIf="issue.assigneeName">
+          <label>Assignee:</label>
+          <span>{{ issue.assigneeName }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Created:</label>
+          <span>{{ issue.createdAt | date:'medium' }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Last Updated:</label>
+          <span>{{ issue.updatedAt | date:'medium' }}</span>
+        </div>
+        <div class="meta-item" *ngIf="issue.tags && issue.tags.length > 0">
+          <label>Tags:</label>
+          <span>{{ issue.tags.join(', ') }}</span>
+        </div>
+      </div>
+
+      <div class="activity-section">
+        <h3>Activity Log</h3>
+        <p class="placeholder">Activity log feature coming soon...</p>
+      </div>
+
+      <div class="comments-section">
+        <h3>Comments</h3>
+        <p class="placeholder">Comment thread feature coming soon...</p>
+      </div>
+    </div>
+
+    <div class="edit-form" *ngIf="editing">
+      <h2>Edit Issue</h2>
+      
+      <div class="form-group">
+        <label>Title</label>
+        <input 
+          type="text" 
+          [(ngModel)]="editForm.title" 
+          class="form-input">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea 
+          [(ngModel)]="editForm.description" 
+          rows="6"
+          class="form-input"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="editForm.status" class="form-input">
+            <option value="OPEN">Open</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="CLOSED">Closed</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Priority</label>
+          <select [(ngModel)]="editForm.priority" class="form-input">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary" (click)="saveEdit()">Save Changes</button>
+        <button class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

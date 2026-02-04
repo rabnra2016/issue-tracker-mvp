@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Tracker MVP - Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .response { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; white-space: pre-wrap; font-family: monospace; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Issue Tracker MVP - API Demo</h1>
+    <p><strong>Backend:</strong> http://localhost:8080 | <strong>Status:</strong> <span id="status">Checking...</span></p>
+
+    <div class="section">
+        <h2>1. Authentication</h2>
+        <h3>Signup</h3>
+        <input type="email" id="signupEmail" placeholder="Email" value="user@example.com">
+        <input type="password" id="signupPassword" placeholder="Password" value="password123">
+        <input type="text" id="signupName" placeholder="Name" value="John Doe">
+        <button onclick="signup()">Sign Up</button>
+        
+        <h3>Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
+        <input type="password" id="loginPassword" placeholder="Password" value="password123">
+        <button onclick="login()">Login</button>
+        
+        <div id="authResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Projects</h2>
+        <input type="text" id="projectName" placeholder="Project Name" value="My First Project">
+        <button onclick="createProject()">Create Project</button>
+        <button onclick="getProjects()">Get My Projects</button>
+        <div id="projectResponse" class="response"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Issues</h2>
+        <input type="number" id="issueProjectId" placeholder="Project ID" value="1">
+        <input type="text" id="issueTitle" placeholder="Issue Title" value="Fix login bug">
+        <textarea id="issueDescription" placeholder="Description" rows="3">The login button is not working on mobile devices</textarea>
+        <select id="issuePriority">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM" selected>Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+        </select>
+        <button onclick="createIssue()">Create Issue</button>
+        <button onclick="getIssues()">Get Issues</button>
+        <div id="issueResponse" class="response"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        let token = '';
+
+        // Check health
+        async function checkHealth() {
+            try {
+                const res = await fetch(`${API_URL}/health`);
+                const data = await res.json();
+                document.getElementById('status').textContent = data.status;
+                document.getElementById('status').className = 'success';
+            } catch (err) {
+                document.getElementById('status').textContent = 'DOWN';
+                document.getElementById('status').className = 'error';
+            }
+        }
+
+        async function signup() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const name = document.getElementById('signupName').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password, name})
+                });
+                const data = await res.json();
+                token = data.token;
+                document.getElementById('authResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('authResponse').className = 'response success';
+            } catch (err) {
+                document.getElementById('authResponse').textContent = 'Error: ' + err.message;
+                document.getElementById('authResponse').className = 'response error';
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                token = data.token;
+                document.getElementById('authResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('authResponse').className = 'response success';
+            } catch (err) {
+                document.getElementById('authResponse').textContent = 'Error: ' + err.message;
+                document.getElementById('authResponse').className = 'response error';
+            }
+        }
+
+        async function createProject() {
+            const name = document.getElementById('projectName').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/projects`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({name})
+                });
+                const data = await res.json();
+                document.getElementById('projectResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('projectResponse').className = 'response success';
+            } catch (err) {
+                document.getElementById('projectResponse').textContent = 'Error: ' + err.message;
+                document.getElementById('projectResponse').className = 'response error';
+            }
+        }
+
+        async function getProjects() {
+            try {
+                const res = await fetch(`${API_URL}/projects`, {
+                    headers: {'Authorization': `Bearer ${token}`}
+                });
+                const data = await res.json();
+                document.getElementById('projectResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('projectResponse').className = 'response success';
+            } catch (err) {
+                document.getElementById('projectResponse').textContent = 'Error: ' + err.message;
+                document.getElementById('projectResponse').className = 'response error';
+            }
+        }
+
+        async function createIssue() {
+            const projectId = parseInt(document.getElementById('issueProjectId').value);
+            const title = document.getElementById('issueTitle').value;
+            const description = document.getElementById('issueDescription').value;
+            const priority = document.getElementById('issuePriority').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/issues`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({projectId, title, description, priority})
+                });
+                const data = await res.json();
+                document.getElementById('issueResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('issueResponse').className = 'response success';
+            } catch (err) {
+                document.getElementById('issueResponse').textContent = 'Error: ' + err.message;
+                document.getElementById('issueResponse').className = 'response error';
+            }
+        }
+
+        async function getIssues() {
+            const projectId = document.getElementById('issueProjectId').value;
+            try {
+                const res = await fetch(`${API_URL}/issues?projectId=${projectId}&page=0&size=20`, {
+                    headers: {'Authorization': `Bearer ${token}`}
+                });
+                const data = await res.json();
+                document.getElementById('issueResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('issueResponse').className = 'response success';
+            } catch (err) {
+                document.getElementById('issueResponse').textContent = 'Error: ' + err.message;
+                document.getElementById('issueResponse').className = 'response error';
+            }
+        }
+
+        // Check health on load
+        checkHealth();
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>
